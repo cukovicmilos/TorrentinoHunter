@@ -147,6 +147,15 @@ async function addMovie() {
     imdbInput.value = '';
     loadMovies();
 
+    // Odmah proveri da li postoji torrent za novi film
+    console.log('[TorrentinoHunter] Auto-checking newly added movie...');
+    const movieIndex = movies.length - 1;
+
+    // Ne čekaj, nego pokreni check u pozadini
+    checkSingleMovie(movieIndex).then(() => {
+      console.log('[TorrentinoHunter] Auto-check completed');
+    });
+
   } catch (error) {
     console.error('Error adding movie:', error);
     alert('Greška pri dodavanju filma!');

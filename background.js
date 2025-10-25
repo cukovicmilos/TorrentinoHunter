@@ -126,6 +126,14 @@ async function searchTorrent(title, year) {
     // Pripremamo naslov za matching
     const titleLower = title.toLowerCase().trim();
 
+    // Normalizuj naziv - ukloni specijalne karaktere za bolje matchovanje
+    const normalizeTitle = (str) => {
+      return str.toLowerCase()
+        .replace(/[,\-\'\:]/g, '') // Ukloni zareze, crtice, apostrofe, dvotačke
+        .replace(/\s+/g, ' ')      // Multiple spaces -> jedan space
+        .trim();
+    };
+
     // Ekstrahovati broj iz naslova ako postoji (npr. "Zootopia 2" -> ima "2")
     const sequelNumberMatch = titleLower.match(/\s+(\d+)$/); // Broj na kraju
     const hasSequelNumber = sequelNumberMatch !== null;
@@ -136,12 +144,16 @@ async function searchTorrent(title, year) {
       ? titleLower.replace(/\s+\d+$/, '').trim()
       : titleLower;
 
+    // Normalizovana verzija za matching
+    const normalizedBaseTitle = normalizeTitle(baseTitleLower);
+
     // Rimski brojevi za matching (2 -> II, 3 -> III, itd.)
     const romanNumerals = { '2': 'ii', '3': 'iii', '4': 'iv', '5': 'v', '6': 'vi', '7': 'vii', '8': 'viii', '9': 'ix', '10': 'x' };
     const sequelRoman = hasSequelNumber ? romanNumerals[sequelNumber] : null;
 
     console.log('[TorrentinoHunter] Searching for:', titleLower, 'Year:', year || 'N/A');
     console.log('[TorrentinoHunter] Base title:', baseTitleLower);
+    console.log('[TorrentinoHunter] Normalized:', normalizedBaseTitle);
     if (hasSequelNumber) {
       console.log('[TorrentinoHunter] Sequel number:', sequelNumber, 'Roman:', sequelRoman);
     }
@@ -153,21 +165,18 @@ async function searchTorrent(title, year) {
 
     for (let match of torrentMatches) {
       const torrentName = match[1].toLowerCase().trim();
+      const normalizedTorrentName = normalizeTitle(torrentName);
 
-      // Proveri da li torrent sadrži osnovno ime
-      if (!torrentName.includes(baseTitleLower)) {
+      // Proveri da li torrent sadrži osnovno ime (normalizovano)
+      if (!normalizedTorrentName.includes(normalizedBaseTitle)) {
         continue; // Ne sadrži čak ni osnovno ime filma
       }
 
       // KRITIČNO: Ako imamo godinu iz IMDB-a, torrent MORA da sadrži tu godinu
       if (year) {
         const yearStr = year.toString();
-        const hasYear = torrentName.includes(`(${yearStr})`) ||
-                       torrentName.includes(` ${yearStr} `) ||
-                       torrentName.includes(`.${yearStr}.`) ||
-                       torrentName.includes(`_${yearStr}_`) ||
-                       torrentName.includes(`-${yearStr}-`) ||
-                       torrentName.includes(`${yearStr}p`); // npr. "2025p" iz "2025 1080p"
+        // Fleksibilniji year matching - samo proveri da postoji godina NEGDE u nazivu
+        const hasYear = torrentName.includes(yearStr);
 
         if (!hasYear) {
           console.log('[TorrentinoHunter] Skipping (wrong year):', torrentName.substring(0, 60));
