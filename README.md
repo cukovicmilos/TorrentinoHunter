@@ -15,7 +15,7 @@ Chrome ekstenzija za automatsko praćenje dostupnosti torrenata na ThePirateBay 
 
 1. **Preuzmite ili klonirajte projekat**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/TorrentinoHunter.git
+   git clone https://github.com/cukovicmilos/TorrentinoHunter.git
    cd TorrentinoHunter
    ```
 
