@@ -1,8 +1,5 @@
 // TorrentinoHunter Popup Script
 
-// Učitaj API key iz config.js
-const OMDB_API_KEY = CONFIG?.OMDB_API_KEY || '';
-
 // DOM elementi
 const imdbInput = document.getElementById('imdbInput');
 const addMovieBtn = document.getElementById('addMovie');
@@ -166,18 +163,7 @@ async function addMovie() {
 
 async function fetchMovieData(imdbId) {
   try {
-    // Pokušaj prvo sa OMDb API
-    if (OMDB_API_KEY && OMDB_API_KEY !== 'YOUR_API_KEY') {
-      const response = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_API_KEY}`);
-      const data = await response.json();
-      console.log('[TorrentinoHunter] OMDb response:', data);
-      if (data.Response === 'True') {
-        return data;
-      }
-      console.log('[TorrentinoHunter] OMDb failed, using IMDB fallback');
-    }
-
-    // Fallback: scrape IMDB stranicu
+    // Scrape IMDB stranicu direktno
     console.log('[TorrentinoHunter] Fetching from IMDB:', imdbId);
     const response = await fetch(`https://www.imdb.com/title/${imdbId}/`);
     const html = await response.text();

@@ -19,20 +19,11 @@ Chrome ekstenzija za automatsko praćenje dostupnosti torrenata na ThePirateBay 
    cd TorrentinoHunter
    ```
 
-2. **(Opciono) Konfigurišite OMDb API ključ**
-   - Registrujte se na http://www.omdbapi.com/ (besplatno)
-   - Kopirajte `config.example.js` u `config.js`:
-     ```bash
-     cp config.example.js config.js
-     ```
-   - Otvorite `config.js` i zamenite `YOUR_API_KEY_HERE` sa vašim ključem
-   - Ovo omogućava brže učitavanje podataka o filmovima (bez ovoga koristi scraping)
-
-3. **Otvorite Chrome Extensions stranicu**
+2. **Otvorite Chrome Extensions stranicu**
    - Idite na `chrome://extensions/`
    - Uključite **Developer mode** (gornji desni ugao)
 
-4. **Učitajte ekstenziju**
+3. **Učitajte ekstenziju**
    - Kliknite na **Load unpacked**
    - Izaberite `TorrentinoHunter` folder
 
@@ -84,8 +75,6 @@ TorrentinoHunter/
 ├── popup.html            # Popup interfejs
 ├── popup.js              # Popup logika
 ├── popup.css             # Stilovi
-├── config.example.js     # Template za konfiguraciju
-├── config.js             # Lična konfiguracija (gitignored)
 ├── movies.md             # Lista IMDB linkova
 ├── .gitignore            # Git ignore fajl
 ├── icons/                # Ikonice ekstenzije
@@ -97,7 +86,7 @@ TorrentinoHunter/
 
 ## Kako funkcioniše
 
-1. **Dodavanje filmova**: IMDB linkovi se parsiraju i podaci o filmovima (naziv, godina, poster) se preuzimaju sa OMDb API ili direktno sa IMDB-a
+1. **Dodavanje filmova**: IMDB linkovi se parsiraju i podaci o filmovima (naziv, godina, poster) se preuzimaju direktno sa IMDB-a (scraping)
 
 2. **Pametno matchovanje**:
    - Proverava se **godina** filma (mora da se poklapa sa torrentom)
