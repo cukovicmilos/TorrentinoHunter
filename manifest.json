@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "TorrentinoHunter",
+  "version": "1.1.0",
+  "description": "Automatsko praćenje dostupnosti torrenata za filmove sa IMDB liste",
+  "permissions": [
+    "storage",
+    "alarms",
+    "notifications"
+  ],
+  "host_permissions": [
+    "https://thepiratebay10.xyz/*",
+    "https://www.imdb.com/*",
+    "https://www.omdbapi.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

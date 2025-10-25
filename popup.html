@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TorrentinoHunter</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>TorrentinoHunter</h1>
+      <div class="actions">
+        <button id="loadMd" class="btn btn-secondary" title="Učitaj movies.md fajl">
+          📁 Učitaj MD
+        </button>
+        <button id="checkAll" class="btn btn-primary" title="Proveri sve filmove">
+          🔄 Proveri sve
+        </button>
+      </div>
+    </header>
+
+    <div class="add-movie">
+      <input
+        type="text"
+        id="imdbInput"
+        placeholder="https://www.imdb.com/title/tt1234567/"
+        title="Unesite IMDB link"
+      >
+      <button id="addMovie" class="btn btn-success">➕ Dodaj</button>
+    </div>
+
+    <div class="stats">
+      <span class="stat">Ukupno: <strong id="totalCount">0</strong></span>
+      <span class="stat">Pronađeno: <strong id="foundCount">0</strong></span>
+      <span class="stat">Čeka: <strong id="pendingCount">0</strong></span>
+    </div>
+
+    <div id="moviesList" class="movies-list">
+      <div class="empty-state">
+        <p>Nema filmova u listi</p>
+        <p class="hint">Dodajte IMDB link ili učitajte movies.md fajl</p>
+      </div>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Proveravam...</p>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
