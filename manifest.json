@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TorrentinoHunter",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Automatsko praćenje dostupnosti torrenata za filmove sa IMDB liste",
   "permissions": [
     "storage",
@@ -10,10 +10,12 @@
   ],
   "host_permissions": [
     "https://thepiratebay10.xyz/*",
+    "https://www.1377x.to/*",
     "https://www.imdb.com/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_popup": "popup.html",

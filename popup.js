@@ -1,7 +1,10 @@
 // TorrentinoHunter Popup Script
 
+import { fetchMovieData } from './sources/movieData.js';
+
 // DOM elementi
 const imdbInput = document.getElementById('imdbInput');
+const customInput = document.getElementById('customInput');
 const addMovieBtn = document.getElementById('addMovie');
 const loadMdBtn = document.getElementById('loadMd');
 const checkAllBtn = document.getElementById('checkAll');
@@ -16,6 +19,9 @@ addMovieBtn.addEventListener('click', addMovie);
 loadMdBtn.addEventListener('click', loadMoviesFromMd);
 checkAllBtn.addEventListener('click', checkAllMovies);
 imdbInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') addMovie();
+});
+customInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') addMovie();
 });
 
@@ -55,7 +61,10 @@ function renderMovies(movies) {
       <div class="movie-info">
         <h3>${movie.title} ${movie.year ? `(${movie.year})` : ''}</h3>
         <div class="movie-meta">
-          <span class="imdb-id">${movie.imdbId}</span>
+          ${movie.imdbId
+            ? `<span class="imdb-id">${movie.imdbId}</span>`
+            : `<span class="imdb-id custom-search">Direktna pretraga</span>`
+          }
           ${getStatusBadge(movie)}
         </div>
         ${movie.status === 'found' || movie.status === 'cam_ts' ? `
@@ -77,11 +86,13 @@ function renderMovies(movies) {
 }
 
 function getStatusBadge(movie) {
+  const sourceBadge = movie.source ? `<span class="badge badge-source">${movie.source}</span>` : '';
+
   switch (movie.status) {
     case 'found':
-      return `<span class="badge badge-success">✓ Pronađen (${movie.quality})</span>`;
+      return `<span class="badge badge-success">✓ Pronađen (${movie.quality})</span>${sourceBadge}`;
     case 'cam_ts':
-      return `<span class="badge badge-warning">⚠️ Samo CAM/TS</span>`;
+      return `<span class="badge badge-warning">⚠️ Samo CAM/TS</span>${sourceBadge}`;
     default:
       return `<span class="badge badge-pending">⏳ Čeka</span>`;
   }
@@ -95,53 +106,89 @@ function updateStats(movies) {
 
 async function addMovie() {
   const imdbUrl = imdbInput.value.trim();
+  const customTitle = customInput.value.trim();
 
-  if (!imdbUrl) {
-    alert('Unesite IMDB link!');
+  // Proveri da li je unet IMDB link ili običan string
+  if (!imdbUrl && !customTitle) {
+    alert('Unesite IMDB link ili naziv filma!');
     return;
   }
 
-  // Ekstraktuj IMDB ID
-  const imdbIdMatch = imdbUrl.match(/tt\d+/);
-  if (!imdbIdMatch) {
-    alert('Neispravan IMDB link!');
+  if (imdbUrl && customTitle) {
+    alert('Unesite samo jedan od dva polja - ili IMDB link ili naziv filma!');
     return;
   }
 
-  const imdbId = imdbIdMatch[0];
-
-  // Proveri da li već postoji
   const { movies = [] } = await chrome.storage.local.get('movies');
-  if (movies.some(m => m.imdbId === imdbId)) {
-    alert('Film već postoji u listi!');
-    return;
-  }
 
   showLoading(true);
 
   try {
-    // Preuzmi podatke o filmu sa OMDb API
-    const movieData = await fetchMovieData(imdbId);
+    let newMovie;
 
-    if (!movieData) {
-      alert('Nije moguće preuzeti podatke o filmu!');
-      showLoading(false);
-      return;
+    // Način 1: IMDB link
+    if (imdbUrl) {
+      // Ekstraktuj IMDB ID
+      const imdbIdMatch = imdbUrl.match(/tt\d+/);
+      if (!imdbIdMatch) {
+        alert('Neispravan IMDB link!');
+        showLoading(false);
+        return;
+      }
+
+      const imdbId = imdbIdMatch[0];
+
+      // Proveri da li već postoji
+      if (movies.some(m => m.imdbId === imdbId)) {
+        alert('Film već postoji u listi!');
+        showLoading(false);
+        return;
+      }
+
+      // Preuzmi podatke o filmu sa IMDB-a
+      const movieData = await fetchMovieData(imdbId);
+
+      if (!movieData) {
+        alert('Nije moguće preuzeti podatke o filmu!');
+        showLoading(false);
+        return;
+      }
+
+      newMovie = {
+        imdbId: imdbId,
+        title: movieData.Title,
+        year: movieData.Year,
+        poster: movieData.Poster,
+        status: 'pending',
+        type: 'imdb',
+        addedDate: new Date().toISOString()
+      };
     }
+    // Način 2: Običan string
+    else {
+      // Proveri da li već postoji sa istim naslovom
+      if (movies.some(m => m.title.toLowerCase() === customTitle.toLowerCase())) {
+        alert('Film sa tim naslovom već postoji u listi!');
+        showLoading(false);
+        return;
+      }
 
-    const newMovie = {
-      imdbId: imdbId,
-      title: movieData.Title,
-      year: movieData.Year,
-      poster: movieData.Poster,
-      status: 'pending',
-      addedDate: new Date().toISOString()
-    };
+      newMovie = {
+        imdbId: null,
+        title: customTitle,
+        year: null,
+        poster: 'N/A',
+        status: 'pending',
+        type: 'custom',
+        addedDate: new Date().toISOString()
+      };
+    }
 
     movies.push(newMovie);
     await chrome.storage.local.set({ movies });
 
     imdbInput.value = '';
+    customInput.value = '';
     loadMovies();
 
     // Odmah proveri da li postoji torrent za novi film
@@ -161,52 +208,7 @@ async function addMovie() {
   showLoading(false);
 }
 
-async function fetchMovieData(imdbId) {
-  try {
-    // Scrape IMDB stranicu direktno
-    console.log('[TorrentinoHunter] Fetching from IMDB:', imdbId);
-    const response = await fetch(`https://www.imdb.com/title/${imdbId}/`);
-    const html = await response.text();
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
-    // Debug: isprintaj sve h1 tagove da vidimo strukturu
-    const allH1s = doc.querySelectorAll('h1');
-    console.log('[TorrentinoHunter] Found h1 elements:', allH1s.length);
-    allH1s.forEach((h1, i) => {
-      console.log(`  H1 #${i}:`, h1.textContent?.trim()?.substring(0, 50), 'data-testid:', h1.getAttribute('data-testid'));
-    });
-
-    // Probaj više različitih selektora za title
-    let titleElement = doc.querySelector('h1[data-testid="hero__primary-text"]');
-    if (!titleElement) titleElement = doc.querySelector('h1[data-testid="hero-title-block__title"]');
-    if (!titleElement) titleElement = doc.querySelector('h1.sc-afe43def-0');
-    if (!titleElement) titleElement = doc.querySelector('h1');
-
-    // Probaj više selektora za godinu
-    let yearElement = doc.querySelector('a[href*="releaseinfo"]');
-    if (!yearElement) yearElement = doc.querySelector('a[href*="/releaseinfo"]');
-    if (!yearElement) yearElement = doc.querySelector('[data-testid="hero-title-block__metadata"] li:first-child a');
-
-    // Poster
-    const posterElement = doc.querySelector('img[class*="ipc-image"]');
-
-    const movieData = {
-      Title: titleElement?.textContent?.trim() || 'Unknown',
-      Year: yearElement?.textContent?.trim() || '',
-      Poster: posterElement?.src || 'N/A'
-    };
-
-    console.log('[TorrentinoHunter] IMDB scraped data:', movieData);
-    console.log('[TorrentinoHunter] Title element found:', !!titleElement, titleElement?.tagName);
-    return movieData;
-
-  } catch (error) {
-    console.error('Error fetching movie data:', error);
-    return null;
-  }
-}
+// fetchMovieData je sada importovan iz movieData.js modula
 
 async function removeMovie(index) {
   if (!confirm('Da li sigurno želite da uklonite ovaj film?')) {
@@ -236,10 +238,12 @@ async function checkSingleMovie(index) {
       movie.status = 'found';
       movie.quality = result.quality;
       movie.searchUrl = result.searchUrl;
+      movie.source = result.source;
       movie.foundDate = new Date().toISOString();
     } else if (result.hasCamTS) {
       movie.status = 'cam_ts';
       movie.searchUrl = result.searchUrl;
+      movie.source = result.source;
     } else {
       movie.status = 'pending';
     }

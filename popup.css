@@ -42,14 +42,14 @@ header h1 {
 /* Add movie section */
 .add-movie {
   padding: 16px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
   gap: 8px;
   background: #f9f9f9;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .add-movie input {
-  flex: 1;
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -185,6 +185,12 @@ header h1 {
   font-family: 'Courier New', monospace;
 }
 
+.imdb-id.custom-search {
+  color: #667eea;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 500;
+}
+
 .badge {
   padding: 2px 8px;
   border-radius: 12px;
@@ -206,6 +212,12 @@ header h1 {
 .badge-pending {
   background: #F5F5F5;
   color: #616161;
+}
+
+.badge-source {
+  background: #E3F2FD;
+  color: #1565C0;
+  margin-left: 4px;
 }
 
 .search-link {
