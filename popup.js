@@ -59,7 +59,7 @@ function renderMovies(movies) {
         }
       </div>
       <div class="movie-info">
-        <h3>${movie.title} ${movie.year ? `(${movie.year})` : ''}</h3>
+        <h3 class="movie-title" data-index="${index}">${movie.title} ${movie.year ? `(${movie.year})` : ''}</h3>
         <div class="movie-meta">
           ${movie.imdbId
             ? `<span class="imdb-id">${movie.imdbId}</span>`
@@ -346,6 +346,7 @@ moviesList.addEventListener('click', (e) => {
   const checkBtn = e.target.closest('.btn-check');
   const removeBtn = e.target.closest('.btn-remove');
   const poster = e.target.closest('.movie-poster');
+  const title = e.target.closest('.movie-title');
 
   if (checkBtn) {
     const index = parseInt(checkBtn.dataset.index);
@@ -353,8 +354,8 @@ moviesList.addEventListener('click', (e) => {
   } else if (removeBtn) {
     const index = parseInt(removeBtn.dataset.index);
     removeMovie(index);
-  } else if (poster) {
-    const index = parseInt(poster.dataset.index);
+  } else if (poster || title) {
+    const index = parseInt((poster || title).dataset.index);
     chrome.storage.local.get('movies').then(({ movies = [] }) => {
       const movie = movies[index];
       if (movie.imdbId) {

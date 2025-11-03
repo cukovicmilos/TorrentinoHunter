@@ -139,6 +139,7 @@ header h1 {
   height: 90px;
   border-radius: 4px;
   overflow: hidden;
+  cursor: pointer;
   transition: transform 0.2s ease;
 }
 
@@ -175,6 +176,12 @@ header h1 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.movie-info h3:hover {
+  color: #667eea;
 }
 
 .movie-meta {
