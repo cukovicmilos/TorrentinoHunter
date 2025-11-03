@@ -52,7 +52,7 @@ function renderMovies(movies) {
 
   moviesList.innerHTML = movies.map((movie, index) => `
     <div class="movie-card ${movie.status || 'pending'}">
-      <div class="movie-poster">
+      <div class="movie-poster" data-index="${index}">
         ${movie.poster && movie.poster !== 'N/A'
           ? `<img src="${movie.poster}" alt="${movie.title}">`
           : `<div class="no-poster">🎬</div>`
@@ -345,6 +345,7 @@ function showLoading(show) {
 moviesList.addEventListener('click', (e) => {
   const checkBtn = e.target.closest('.btn-check');
   const removeBtn = e.target.closest('.btn-remove');
+  const poster = e.target.closest('.movie-poster');
 
   if (checkBtn) {
     const index = parseInt(checkBtn.dataset.index);
@@ -352,5 +353,15 @@ moviesList.addEventListener('click', (e) => {
   } else if (removeBtn) {
     const index = parseInt(removeBtn.dataset.index);
     removeMovie(index);
+  } else if (poster) {
+    const index = parseInt(poster.dataset.index);
+    chrome.storage.local.get('movies').then(({ movies = [] }) => {
+      const movie = movies[index];
+      if (movie.imdbId) {
+        window.open(`https://www.imdb.com/title/${movie.imdbId}`, '_blank');
+      } else {
+        window.open(`https://www.imdb.com/find?q=${encodeURIComponent(movie.title)}`, '_blank');
+      }
+    });
   }
 });

@@ -139,6 +139,11 @@ header h1 {
   height: 90px;
   border-radius: 4px;
   overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.movie-poster:hover {
+  transform: scale(1.05);
 }
 
 .movie-poster img {
