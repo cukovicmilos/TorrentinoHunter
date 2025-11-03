@@ -1,6 +1,6 @@
 // TorrentinoHunter Popup Script
 
-import { fetchMovieData } from './sources/movieData.js';
+import { fetchMovieData, searchMovieByTitle } from './sources/movieData.js';
 
 // DOM elementi
 const imdbInput = document.getElementById('imdbInput');
@@ -8,6 +8,8 @@ const customInput = document.getElementById('customInput');
 const addMovieBtn = document.getElementById('addMovie');
 const loadMdBtn = document.getElementById('loadMd');
 const checkAllBtn = document.getElementById('checkAll');
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = document.getElementById('themeIcon');
 const moviesList = document.getElementById('moviesList');
 const loading = document.getElementById('loading');
 const totalCount = document.getElementById('totalCount');
@@ -18,6 +20,7 @@ const pendingCount = document.getElementById('pendingCount');
 addMovieBtn.addEventListener('click', addMovie);
 loadMdBtn.addEventListener('click', loadMoviesFromMd);
 checkAllBtn.addEventListener('click', checkAllMovies);
+themeToggle.addEventListener('click', toggleTheme);
 imdbInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') addMovie();
 });
@@ -27,6 +30,8 @@ customInput.addEventListener('keypress', (e) => {
 
 // Inicijalizacija
 loadMovies();
+loadTheme();
+updateMissingPosters();
 
 // Funkcije
 
@@ -173,15 +178,31 @@ async function addMovie() {
         return;
       }
 
-      newMovie = {
-        imdbId: null,
-        title: customTitle,
-        year: null,
-        poster: 'N/A',
-        status: 'pending',
-        type: 'custom',
-        addedDate: new Date().toISOString()
-      };
+      // Pretraži IMDB za film po naslovu
+      const movieData = await searchMovieByTitle(customTitle);
+
+      if (movieData) {
+        newMovie = {
+          imdbId: movieData.imdbId,
+          title: movieData.Title,
+          year: movieData.Year,
+          poster: movieData.Poster,
+          status: 'pending',
+          type: 'custom',
+          addedDate: new Date().toISOString()
+        };
+      } else {
+        // Ako se ne nađe na IMDB, sačuvaj samo naslov
+        newMovie = {
+          imdbId: null,
+          title: customTitle,
+          year: null,
+          poster: 'N/A',
+          status: 'pending',
+          type: 'custom',
+          addedDate: new Date().toISOString()
+        };
+      }
     }
 
     movies.push(newMovie);
@@ -339,6 +360,80 @@ function parseMoviesMd(content) {
 
 function showLoading(show) {
   loading.classList.toggle('hidden', !show);
+}
+
+// Theme functions
+async function loadTheme() {
+  try {
+    const { darkMode = false } = await chrome.storage.local.get('darkMode');
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+      themeIcon.textContent = '☀️';
+    }
+  } catch (error) {
+    console.error('Error loading theme:', error);
+  }
+}
+
+async function updateMissingPosters() {
+  try {
+    const { movies = [] } = await chrome.storage.local.get('movies');
+    const moviesWithoutPoster = movies.filter(m => !m.poster || m.poster === 'N/A');
+    
+    if (moviesWithoutPoster.length === 0) {
+      console.log('[TorrentinoHunter] All movies have posters');
+      return;
+    }
+    
+    console.log(`[TorrentinoHunter] Found ${moviesWithoutPoster.length} movies without posters, updating...`);
+    
+    let updatedCount = 0;
+    
+    for (const movie of moviesWithoutPoster) {
+      // Preskoči ako već ima IMDB ID (trebao bi imati poster)
+      if (movie.imdbId) {
+        const movieData = await fetchMovieData(movie.imdbId);
+        if (movieData && movieData.Poster && movieData.Poster !== 'N/A') {
+          movie.poster = movieData.Poster;
+          movie.year = movieData.Year || movie.year;
+          movie.title = movieData.Title || movie.title;
+          updatedCount++;
+        }
+      } else {
+        // Traži po naslovu
+        const movieData = await searchMovieByTitle(movie.title);
+        if (movieData) {
+          movie.imdbId = movieData.imdbId;
+          movie.poster = movieData.Poster;
+          movie.year = movieData.Year || movie.year;
+          movie.title = movieData.Title || movie.title;
+          updatedCount++;
+        }
+      }
+      
+      // Malo pauziraj da ne preopterećujemo IMDB
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
+    if (updatedCount > 0) {
+      await chrome.storage.local.set({ movies });
+      console.log(`[TorrentinoHunter] Updated ${updatedCount} movies with posters`);
+      loadMovies(); // Osveži prikaz
+    }
+    
+  } catch (error) {
+    console.error('Error updating missing posters:', error);
+  }
+}
+
+async function toggleTheme() {
+  try {
+    const isDark = document.body.classList.toggle('dark-mode');
+    themeIcon.textContent = isDark ? '☀️' : '🌙';
+    await chrome.storage.local.set({ darkMode: isDark });
+  } catch (error) {
+    console.error('Error toggling theme:', error);
+  }
 }
 
 // Event delegation za dugmad u movie cards

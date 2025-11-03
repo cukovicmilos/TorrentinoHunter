@@ -6,6 +6,53 @@
  * @param {string} imdbId - IMDB ID (e.g., "tt1234567")
  * @returns {Promise<{Title: string, Year: string, Poster: string}|null>}
  */
+/**
+ * Search for movie by title and fetch data from IMDB
+ * @param {string} title - Movie title to search for
+ * @returns {Promise<{Title: string, Year: string, Poster: string, imdbId: string}|null>}
+ */
+export async function searchMovieByTitle(title) {
+  try {
+    console.log('[TorrentinoHunter] Searching IMDB for title:', title);
+    
+    // Search IMDB for the title
+    const searchResponse = await fetch(`https://www.imdb.com/find?q=${encodeURIComponent(title)}&s=tt&ttype=ft`);
+    const searchHtml = await searchResponse.text();
+    const searchParser = new DOMParser();
+    const searchDoc = searchParser.parseFromString(searchHtml, 'text/html');
+    
+    // Find first movie result
+    const firstResult = searchDoc.querySelector('a[href*="/title/tt"]');
+    if (!firstResult) {
+      console.log('[TorrentinoHunter] No movie found for title:', title);
+      return null;
+    }
+    
+    const imdbId = firstResult.href.match(/\/title\/(tt\d+)/)?.[1];
+    if (!imdbId) {
+      console.log('[TorrentinoHunter] Could not extract IMDB ID from search result');
+      return null;
+    }
+    
+    console.log('[TorrentinoHunter] Found IMDB ID:', imdbId);
+    
+    // Fetch full movie data using the IMDB ID
+    const movieData = await fetchMovieData(imdbId);
+    if (movieData) {
+      return {
+        ...movieData,
+        imdbId: imdbId
+      };
+    }
+    
+    return null;
+    
+  } catch (error) {
+    console.error('Error searching movie by title:', error);
+    return null;
+  }
+}
+
 export async function fetchMovieData(imdbId) {
   try {
     // Scrape IMDB stranicu direktno

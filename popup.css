@@ -1,5 +1,39 @@
 /* TorrentinoHunter Popup Styles */
 
+:root {
+  /* Light theme colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #f9f9f9;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-muted: #888888;
+  --border-color: #e0e0e0;
+  --border-light: #f0f0f0;
+  --gradient-start: #667eea;
+  --gradient-end: #764ba2;
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode {
+  /* Dark theme colors */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #252525;
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-muted: #888888;
+  --border-color: #404040;
+  --border-light: #333333;
+  --gradient-start: #4a5fc1;
+  --gradient-end: #5a4a91;
+  --card-bg: #2d2d2d;
+  --input-bg: #1a1a1a;
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -9,34 +43,37 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-size: 14px;
-  color: #333;
-  background: #f5f5f5;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
   width: 450px;
   max-height: 600px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
-  background: white;
+  background: var(--bg-primary);
+  transition: background-color 0.3s ease;
 }
 
 /* Header */
 header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
   color: white;
   padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background 0.3s ease;
 }
 
 header h1 {
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .actions {
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
 
 /* Add movie section */
@@ -45,20 +82,24 @@ header h1 {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
   gap: 8px;
-  background: #f9f9f9;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .add-movie input {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .add-movie input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--gradient-start);
 }
 
 /* Stats */
@@ -66,19 +107,22 @@ header h1 {
   display: flex;
   justify-content: space-around;
   padding: 12px 16px;
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .stat {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
 .stat strong {
-  color: #333;
+  color: var(--text-primary);
   font-weight: 600;
   margin-left: 4px;
+  transition: color 0.3s ease;
 }
 
 /* Movies list */
@@ -94,15 +138,29 @@ header h1 {
 
 .movies-list::-webkit-scrollbar-track {
   background: #f1f1f1;
+  transition: background-color 0.3s ease;
 }
 
 .movies-list::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
+  transition: background-color 0.3s ease;
 }
 
 .movies-list::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.dark-mode .movies-list::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.dark-mode .movies-list::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+.dark-mode .movies-list::-webkit-scrollbar-thumb:hover {
+  background: #777;
 }
 
 /* Movie card */
@@ -110,11 +168,11 @@ header h1 {
   display: flex;
   gap: 12px;
   padding: 12px;
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .movie-card:hover {
@@ -172,7 +230,7 @@ header h1 {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 6px;
-  color: #333;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -181,7 +239,7 @@ header h1 {
 }
 
 .movie-info h3:hover {
-  color: #667eea;
+  color: var(--gradient-start);
 }
 
 .movie-meta {
@@ -193,12 +251,13 @@ header h1 {
 
 .imdb-id {
   font-size: 12px;
-  color: #888;
+  color: var(--text-muted);
   font-family: 'Courier New', monospace;
+  transition: color 0.3s ease;
 }
 
 .imdb-id.custom-search {
-  color: #667eea;
+  color: var(--gradient-start);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-weight: 500;
 }
@@ -232,13 +291,35 @@ header h1 {
   margin-left: 4px;
 }
 
+/* Dark mode badge overrides */
+.dark-mode .badge-success {
+  background: #1e4620;
+  color: #4CAF50;
+}
+
+.dark-mode .badge-warning {
+  background: #4a2f00;
+  color: #FF9800;
+}
+
+.dark-mode .badge-pending {
+  background: #2a2a2a;
+  color: #9E9E9E;
+}
+
+.dark-mode .badge-source {
+  background: #1a3a52;
+  color: #64B5F6;
+}
+
 .search-link {
   display: inline-block;
   margin-top: 4px;
   font-size: 12px;
-  color: #667eea;
+  color: var(--gradient-start);
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 .search-link:hover {
@@ -253,10 +334,10 @@ header h1 {
 
 /* Buttons */
 .btn {
-  padding: 8px 12px;
+  padding: 6px 8px;
   border: none;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -288,21 +369,21 @@ header h1 {
 }
 
 .btn-icon {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border: none;
-  background: #f5f5f5;
+  background: var(--bg-secondary);
   border-radius: 50%;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.2s ease, background-color 0.3s ease;
 }
 
 .btn-icon:hover {
-  background: #e0e0e0;
+  background: var(--border-color);
 }
 
 .btn-remove:hover {
@@ -313,7 +394,8 @@ header h1 {
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  color: #999;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
 }
 
 .empty-state p {
@@ -322,7 +404,8 @@ header h1 {
 
 .empty-state .hint {
   font-size: 12px;
-  color: #bbb;
+  color: var(--text-muted);
+  opacity: 0.7;
 }
 
 /* Loading */
@@ -338,6 +421,11 @@ header h1 {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+
+.dark-mode .loading {
+  background: rgba(26, 26, 26, 0.95);
 }
 
 .loading.hidden {
@@ -347,11 +435,12 @@ header h1 {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border: 4px solid var(--border-light);
+  border-top: 4px solid var(--gradient-start);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
+  transition: border-color 0.3s ease;
 }
 
 @keyframes spin {
@@ -360,6 +449,7 @@ header h1 {
 }
 
 .loading p {
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
+  transition: color 0.3s ease;
 }
