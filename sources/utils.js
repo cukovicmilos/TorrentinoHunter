@@ -105,7 +105,7 @@ export function detectQuality(torrentName) {
   // VAŽNO: Koristi word boundary (\b) da bi "ts" matchovalo samo kao celu reč
   // Razlog: "whats" sadrži "ts" ali nije CAM/TS format!
   // Lista loših formata: CAM, HDCAM, TS, HDTS, HD-TS, TELESYNC, TELECINE, R5, SCREENER, TC (TeleCine)
-  const camTsPattern = /\b(cam|hd-?cam|tc|hd-?ts|tele-?sync|telecine|r5|scr|screener)\b|\.ts\b|\bts\./i;
+  const camTsPattern = /\b(cam|hd-?cam|tc|hd-?ts|ts|tele-?sync|telecine|r5|scr|screener)\b|\.ts\b|\bts\./i;
   if (camTsPattern.test(torrentName)) {
     return { quality: '', isCamTS: true };
   }
